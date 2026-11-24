@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>學前測驗：醫學縮寫自動評分</title>
+<style>
+:root{--bg:#f3f5f8;--paper:#fff;--ink:#1b2430;--mute:#5c6776;--line:#d5dbe3;--blue:#1f4e8c;--red:#c62f2f;--ok:#1f7a4d;--warn:#b26a00;--okbg:#eaf6ef;--warnbg:#fff4e0;--badbg:#fdecec;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10151c;--paper:#18202a;--ink:#e6ebf2;--mute:#9aa6b6;--line:#2c3746;--blue:#8db8f2;--red:#ff8a8a;--ok:#6fd49d;--warn:#f0b45a;--okbg:#143124;--warnbg:#3a2c12;--badbg:#3b1b1d}}
+:root[data-theme="dark"]{--bg:#10151c;--paper:#18202a;--ink:#e6ebf2;--mute:#9aa6b6;--line:#2c3746;--blue:#8db8f2;--red:#ff8a8a;--ok:#6fd49d;--warn:#f0b45a;--okbg:#143124;--warnbg:#3a2c12;--badbg:#3b1b1d}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+main{max-width:720px;margin:0 auto;padding:16px 14px 80px}
+header{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:18px 16px;text-align:center}
+header h1{margin:0;font-size:1.15rem;font-weight:700}
+header p{margin:4px 0 0;color:var(--mute);font-size:.95rem}
+.rules{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:6px;margin:12px 0;padding:10px 14px;font-size:.9rem;color:var(--mute)}
+.rules b{color:var(--ink)}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+label.f{display:block;font-size:.85rem;color:var(--mute)}
+input[type=text]{width:100%;font:inherit;color:var(--blue);background:transparent;border:0;border-bottom:1.5px solid var(--line);padding:6px 2px;border-radius:0;outline:none}
+input[type=text]:focus-visible{border-bottom-color:var(--blue);box-shadow:0 2px 0 var(--blue)}
+input[disabled]{opacity:1}
+.q{background:var(--paper);border:1px solid var(--line);border-radius:6px;margin:10px 0;padding:12px 14px}
+.q h2{margin:0 0 6px;font-size:1.05rem;display:flex;gap:10px;align-items:baseline}
+.q h2 .n{color:var(--mute);font-weight:400;min-width:1.6em}
+.q h2 .s{margin-left:auto;font-size:.95rem;font-weight:700}
+.row{display:grid;grid-template-columns:3.2em 1fr;gap:8px;align-items:end;margin-top:4px}
+.row span{font-size:.85rem;color:var(--mute);padding-bottom:7px}
+.sec{font-size:.95rem;font-weight:700;margin:22px 4px 0;color:var(--mute)}
+.q.ok{border-color:var(--ok);background:var(--okbg)}.q.part{border-color:var(--warn);background:var(--warnbg)}.q.bad{border-color:var(--red);background:var(--badbg)}
+.q.ok .s{color:var(--ok)}.q.part .s{color:var(--warn)}.q.bad .s{color:var(--red)}
+.fb{margin:8px 0 0;font-size:.88rem;line-height:1.5;border-top:1px dashed var(--line);padding-top:6px}
+.fb div{margin:2px 0}.fb .ans{color:var(--mute)}.fb .pen{color:var(--red);font-weight:700}
+.bar{position:sticky;bottom:0;margin:16px -14px 0;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
+.bar .tip{flex:1;font-size:.85rem;color:var(--mute)}
+button{font:inherit;font-weight:700;border:0;border-radius:6px;padding:10px 20px;cursor:pointer;background:var(--blue);color:#fff;min-height:44px}
+button.g{background:transparent;color:var(--blue);border:1.5px solid var(--blue)}
+button:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+#result{display:none;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:18px;margin:12px 0;text-align:center}
+#result .big{font-size:3rem;font-weight:800;color:var(--red);line-height:1.1}
+#result .big small{font-size:1.2rem;color:var(--mute);font-weight:400}
+#result p{margin:6px 0 0;color:var(--mute);font-size:.92rem}
+#result p.lv.w{color:var(--red);font-weight:700}
+</style>
+</head>
+<body>
+<main>
+<header><h1>台大醫院復健部物理治療技術科</h1><p>學前測驗：請寫出中文和英文</p></header>
+<div class="rules"><b>評分方式：</b>共 20 題，每題 5 分，滿分 100 分。英文全文 2.5 分、中文 2.5 分；每處小錯（錯字、少字）扣 1 分，單項最多扣到 0 分。英文以單字計分時，每答對一個單字得 1 分，最高 2.5 分（與小錯扣分取較高者）。第 19、20 題為正常值，數值 2.5 分、單位 2.5 分，單位須完全正確才給分。</div>
+<div class="meta"><label class="f">姓名<input type="text" id="name" autocomplete="off"></label><label class="f">日期<input type="text" id="date" autocomplete="off"></label></div>
+<div id="result" aria-live="polite"></div>
+<form id="qs" onsubmit="return false"></form>
+<div class="bar"><span class="tip" id="tip">答案不分大小寫，標點可省略。</span><button class="g" id="reset" type="button">重新作答</button><button id="go" type="button">送出評分</button></div>
+</main>
+<script>
+const Q=[
+["EMB",["endomyocardial biopsy"],["心內膜心肌切片","心內膜切片","心肌內膜切片","心內膜心肌切片檢查","心內膜切片檢查"]],
+["CVP",["central venous pressure"],["中央靜脈壓"]],
+["FVC",["forced vital capacity"],["用力肺活量","用力呼氣肺活量"]],
+["ASD",["atrial septal defect"],["心房中膈缺損","心房中隔缺損"]],
+["TPR",["temperature pulse and respiration","temperature pulse respiration"],["體溫脈搏和呼吸","體溫脈搏呼吸"]],
+["BID",["twice a day","twice daily"],["一天兩次","一天二次","每日兩次","每天兩次","每日二次"]],
+["CMP",["cardiomyopathy"],["心肌病變","心肌病"]],
+["SVG",["saphenous vein graft"],["大隱靜脈移植","大隱靜脈血管移植","大隱靜脈繞道","大隱靜脈繞道移植"]],
+["AMI",["acute myocardial infarction"],["急性心肌梗塞","急性心肌梗死"]],
+["PDRAB",["pan drug resistant acinetobacter baumannii","pandrug resistant acinetobacter baumannii"],["全抗藥性鮑氏不動桿菌","泛抗藥性鮑氏不動桿菌","抗所有藥物之鮑氏不動桿菌","全抗藥鮑氏不動桿菌"]],
+["OM",["obtuse marginal branch","obtuse margin branch","obtuse marginal","obtuse marginal artery"],["鈍緣支","冠狀動脈鈍緣支","鈍緣分支","冠狀動脈鈍緣分支"]],
+["ARDS",["acute respiratory distress syndrome","adult respiratory distress syndrome"],["急性呼吸窘迫症候群","急性呼吸窘迫症","急性呼吸道窘迫症","急性呼吸道窘迫症候群","成人呼吸窘迫症候群"]],
+["I/E",["inspiratory and expiratory ratio","inspiratory to expiratory ratio","inspiratory expiratory ratio"],["吸吐比","吸吐氣比","吸吐氣比率","吸吐比值","吸呼比","吸呼比值"]],
+["NSR",["normal sinus rhythm"],["正常竇性節律","正常竇性心律","正常竇性節奏"]],
+["FEV₁",["forced expiratory volume in one second","forced expiratory volume in 1 second"],["第一秒用力呼氣容積","第一秒用力呼氣容量","第一秒用力呼氣量","一秒用力呼氣容積"]],
+["CMV",["controlled mode ventilation","control mode ventilation","controlled mandatory ventilation","continuous mandatory ventilation"],["控制模式通氣","控制模式之通氣","控制通氣","控制式通氣","連續強制通氣","持續強制通氣"]],
+["Af",["atrial fibrillation"],["心房顫動","心房震顫"]],
+["MR",["mitral regurgitation"],["二尖瓣逆流","僧帽瓣逆流","二尖瓣閉鎖不全","僧帽瓣閉鎖不全","二尖瓣膜逆流","二尖瓣膜閉鎖不全","僧帽瓣膜閉鎖不全"]]
+];
+const NV=[["19. Hemoglobin (female)",["12-14","12-16"],"12–14","g/dL",["gdl","gmdl"],"正常值","g/dL"],["20. PaO₂",["80-100"],"80–100","mmHg",["mmhg"],"正常值（動脈）","mmHg"]];
+const f=document.getElementById("qs");let h="";
+Q.forEach((q,i)=>{h+=`<div class="q" id="q${i}"><h2><span class="n">${i+1}.</span><span>${q[0]}</span><span class="s"></span></h2><div class="row"><span>英文</span><input type="text" id="e${i}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="${q[0]} 英文全文"></div><div class="row"><span>中文</span><input type="text" id="z${i}" autocomplete="off" aria-label="${q[0]} 中文"></div><div class="fb" hidden></div></div>`;if(i==17)h+=`<div class="sec">正常值（單位全對才給分）</div>`});
+NV.forEach((q,i)=>{h+=`<div class="q" id="n${i}"><h2><span>${q[0]}</span><span class="s"></span></h2><div class="row"><span>數值</span><input type="text" id="nv${i}" autocomplete="off" inputmode="text" placeholder="例如 12-14" aria-label="${q[0]} 數值"></div><div class="row"><span>單位</span><input type="text" id="nu${i}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="例如 g/dL" aria-label="${q[0]} 單位"></div><div class="fb" hidden></div></div>`});
+f.innerHTML=h;
+const nE=s=>s.toLowerCase().replace(/[₁]/g,"1").replace(/[-_\/]/g," ").replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
+const nZ=s=>s.replace(/臺/g,"台").replace(/[\s、，,。.；;:：（）()「」\-]/g,"");
+function lev(a,b){const m=a.length,n=b.length,d=[];for(let i=0;i<=m;i++){d[i]=[i];}for(let j=1;j<=n;j++)d[0][j]=j;for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]==b[j-1]?0:1));return d[m][n]}
+function grade(inp,ans,norm){const x=norm(inp);if(!x)return{p:0,t:"未作答",e:0};let best=null;ans.forEach(a=>{const y=norm(a),d=lev(x,y);if(!best||d<best.d)best={d,len:y.length}});
+if(best.d==0)return{p:2.5,t:"正確",e:0};let wp=0,wc=0;if(norm===nE){ans.forEach(a=>{const aw=norm(a).split(" "),iw=x.split(" ");let c=0;aw.forEach(w=>{const k=iw.indexOf(w);if(k>=0){iw.splice(k,1);c++}});if(c>wc)wc=c});wp=Math.min(2.5,wc)}
+const lim=Math.min(2,Math.floor(best.len*0.34));const tp=best.d<=lim?Math.max(0,2.5-best.d):0;
+if(wp>tp)return{p:wp,t:`答對 ${wc} 個單字，得 ${fmt(wp)} 分`,e:0};if(tp>0)return{p:tp,t:`小錯 ${best.d} 處，扣 ${best.d} 分`,e:best.d};return{p:0,t:"錯誤",e:0}}
+const fmt=n=>Number.isInteger(n)?n:n.toFixed(1);
+function show(el,sc,lines){el.classList.remove("ok","part","bad");el.classList.add(sc==5?"ok":sc>0?"part":"bad");el.querySelector(".s").textContent=fmt(sc)+" / 5";const fb=el.querySelector(".fb");fb.hidden=false;fb.innerHTML=lines.join("")}
+let sw=0,active=true,busy=false,lastLeave=0;
+const tipEl=document.getElementById("tip"),base="答案不分大小寫，標點可省略。";
+function note(m){tipEl.textContent=m;clearTimeout(note.t);note.t=setTimeout(()=>{if(active)tipEl.textContent=base},3000)}
+function leave(){const n=Date.now();if(!active||busy||n-lastLeave<800)return;lastLeave=n;sw++;note("已偵測離開頁面 "+sw+" 次，會記錄在結果中。")}
+document.addEventListener("visibilitychange",()=>{if(document.hidden)leave()});
+addEventListener("blur",leave);
+document.addEventListener("contextmenu",e=>e.preventDefault());
+f.addEventListener("paste",e=>{e.preventDefault();note("本測驗不可貼上，請自行輸入。")});
+f.addEventListener("drop",e=>e.preventDefault());
+function lock(v){f.querySelectorAll("input").forEach(i=>i.disabled=v);document.getElementById("go").disabled=v}
+document.getElementById("go").onclick=()=>{
+const emp=[...f.querySelectorAll("input")].filter(i=>!i.value.trim()).length;
+const gb=document.getElementById("go");if(emp&&!gb.dataset.w){gb.dataset.w=1;gb.textContent="仍要送出";tipEl.textContent="還有 "+emp+" 個欄位未填寫，再按一次即送出。";return}delete gb.dataset.w;gb.textContent="送出評分";
+let tot=0,full=0;
+Q.forEach((q,i)=>{const e=grade(document.getElementById("e"+i).value,q[1],nE),z=grade(document.getElementById("z"+i).value,q[2],nZ),s=e.p+z.p;tot+=s;if(s==5)full++;
+const cls=(r)=>r.t=="正確"?"":` <span class="pen">${r.t}</span>`;
+show(document.getElementById("q"+i),s,[`<div>英文 ${fmt(e.p)}/2.5${cls(e)}</div><div>中文 ${fmt(z.p)}/2.5${cls(z)}</div>`,`<div class="ans">參考答案：${q[1][0]}／${q[2][0]}${q[2].length>1?"（亦可：":""}${q[2].slice(1,3).join("、")}${q[2].length>1?"）":""}</div>`])});
+NV.forEach((q,i)=>{const v=document.getElementById("nv"+i).value.trim().replace(/[~～–—－到至]/g,"-").replace(/\s/g,"").replace(/[^0-9.\-]/g,""),u=document.getElementById("nu"+i).value.trim().replace(/\s/g,"").replace(/[^a-zA-Z]/g,"").toLowerCase();
+const vp=q[1].includes(v)?2.5:0,up=q[4].includes(u)?2.5:0,s=vp+up;tot+=s;if(s==5)full++;
+show(document.getElementById("n"+i),s,[`<div>數值 ${fmt(vp)}/2.5${vp?"":' <span class="pen">錯誤或未作答</span>'}</div><div>單位 ${fmt(up)}/2.5${up?"":' <span class="pen">錯誤或未作答</span>'}</div>`,`<div class="ans">參考答案：${q[2]} ${q[3]}</div>`])});
+const r=document.getElementById("result"),nm=document.getElementById("name").value.trim();
+r.style.display="block";r.innerHTML=`<div class="big">${fmt(tot)}<small> / 100</small></div><p>${nm?nm+"，":""}20 題中 ${full} 題全對。往下查看每題批改與參考答案。</p><p class="lv${sw?" w":""}">${sw?`作答期間離開頁面或切換視窗 ${sw} 次`:"作答期間未偵測到離開頁面"}</p>`;
+active=false;lock(true);document.getElementById("tip").textContent="已評分";r.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})};
+document.getElementById("reset").onclick=()=>{const gb=document.getElementById("go");delete gb.dataset.w;gb.textContent="送出評分";f.querySelectorAll("input").forEach(i=>i.value="");f.querySelectorAll(".q").forEach(q=>{q.classList.remove("ok","part","bad");q.querySelector(".s").textContent="";const b=q.querySelector(".fb");b.hidden=true;b.innerHTML=""});document.getElementById("result").style.display="none";sw=0;active=true;lock(false);document.getElementById("tip").textContent="答案不分大小寫，標點可省略。";scrollTo(0,0)};
+</script>
+</body>
+</html>
