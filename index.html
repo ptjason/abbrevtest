@@ -16,9 +16,12 @@ header{background:var(--paper);border:1px solid var(--line);border-radius:6px;pa
 header h1{margin:0;font-size:1.15rem;font-weight:700}
 header p{margin:4px 0 0;color:var(--mute);font-size:.95rem}
 .rules{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:6px;margin:12px 0;padding:10px 14px;font-size:.9rem;color:var(--mute)}
-.rules b{color:var(--ink)}
-.meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
-label.f{display:block;font-size:.85rem;color:var(--mute)}
+.rules b{color:var(--ink)}.rules.warn{border-left-color:var(--red);color:var(--ink)}.rules.warn b{color:var(--red)}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0;background:var(--paper);border:1px solid var(--line);border-top:4px solid var(--blue);border-radius:6px;padding:14px}
+label.f{display:block;font-size:1.05rem;font-weight:700;color:var(--ink)}
+.meta label.f input[type=text]{display:block;margin-top:6px;font-size:1.05rem;font-weight:400;padding:10px 12px;border:2px solid var(--blue);border-radius:6px;background:var(--bg)}
+.meta label.f input[type=text]:focus-visible{box-shadow:0 0 0 3px var(--warn);border-color:var(--blue)}
+@media (max-width:420px){.meta{grid-template-columns:1fr}}
 input[type=text]{width:100%;font:inherit;color:var(--blue);background:transparent;border:0;border-bottom:1.5px solid var(--line);padding:6px 2px;border-radius:0;outline:none}
 input[type=text]:focus-visible{border-bottom-color:var(--blue);box-shadow:0 2px 0 var(--blue)}
 input[disabled]{opacity:1}
@@ -48,8 +51,8 @@ button:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
 <body>
 <main>
 <header><h1>台大醫院復健部物理治療技術科</h1><p>學前測驗：請寫出中文和英文</p></header>
-<div class="rules"><b>評分方式：</b>共 20 題，每題 5 分，滿分 100 分。英文全文 2.5 分、中文 2.5 分；每處小錯（錯字、少字）扣 1 分，單項最多扣到 0 分。英文以單字計分時，每答對一個單字得 1 分，最高 2.5 分（與小錯扣分取較高者）。第 19、20 題為正常值，數值 2.5 分、單位 2.5 分，單位須完全正確才給分。</div>
-<div class="meta"><label class="f">姓名<input type="text" id="name" autocomplete="off"></label><label class="f">日期<input type="text" id="date" autocomplete="off"></label></div>
+<div class="rules"><b>評分方式：</b>共 20 題，每題 5 分，滿分 100 分。英文全文 2.5 分、中文 2.5 分；每處小錯（錯字、少字）扣 1 分，單項最多扣到 0 分。英文以單字計分時，每答對一個單字得 1 分，最高 2.5 分（與小錯扣分取較高者）。第 19、20 題為正常值，數值 2.5 分、單位 2.5 分；數值範圍只對一半得 1 分，單位只對一半也得 1 分。</div><div class="rules warn"><b>注意：</b>作答期間離開本頁面或切換視窗，系統會記錄次數，並顯示在評分結果中。</div>
+<div class="meta"><label class="f">姓名<input type="text" id="name" autocomplete="off" placeholder="請輸入姓名"></label><label class="f">日期<input type="text" id="date" autocomplete="off" placeholder="例如 2026/11/27"></label></div>
 <div id="result" aria-live="polite"></div>
 <form id="qs" onsubmit="return false"></form>
 <div class="bar"><span class="tip" id="tip">答案不分大小寫，標點可省略。</span><button class="g" id="reset" type="button">重新作答</button><button id="go" type="button">送出評分</button></div>
@@ -77,7 +80,7 @@ const Q=[
 ];
 const NV=[["19. Hemoglobin (female)",["12-14","12-16"],"12–14","g/dL",["gdl","gmdl"],"正常值","g/dL"],["20. PaO₂",["80-100"],"80–100","mmHg",["mmhg"],"正常值（動脈）","mmHg"]];
 const f=document.getElementById("qs");let h="";
-Q.forEach((q,i)=>{h+=`<div class="q" id="q${i}"><h2><span class="n">${i+1}.</span><span>${q[0]}</span><span class="s"></span></h2><div class="row"><span>英文</span><input type="text" id="e${i}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="${q[0]} 英文全文"></div><div class="row"><span>中文</span><input type="text" id="z${i}" autocomplete="off" aria-label="${q[0]} 中文"></div><div class="fb" hidden></div></div>`;if(i==17)h+=`<div class="sec">正常值（單位全對才給分）</div>`});
+Q.forEach((q,i)=>{h+=`<div class="q" id="q${i}"><h2><span class="n">${i+1}.</span><span>${q[0]}</span><span class="s"></span></h2><div class="row"><span>英文</span><input type="text" id="e${i}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="${q[0]} 英文全文"></div><div class="row"><span>中文</span><input type="text" id="z${i}" autocomplete="off" aria-label="${q[0]} 中文"></div><div class="fb" hidden></div></div>`;if(i==17)h+=`<div class="sec">正常值（範圍或單位對一半得 1 分）</div>`});
 NV.forEach((q,i)=>{h+=`<div class="q" id="n${i}"><h2><span>${q[0]}</span><span class="s"></span></h2><div class="row"><span>數值</span><input type="text" id="nv${i}" autocomplete="off" inputmode="text" placeholder="例如 12-14" aria-label="${q[0]} 數值"></div><div class="row"><span>單位</span><input type="text" id="nu${i}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="例如 g/dL" aria-label="${q[0]} 單位"></div><div class="fb" hidden></div></div>`});
 f.innerHTML=h;
 const nE=s=>s.toLowerCase().replace(/[₁]/g,"1").replace(/[-_\/]/g," ").replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
@@ -98,19 +101,26 @@ addEventListener("blur",leave);
 document.addEventListener("contextmenu",e=>e.preventDefault());
 f.addEventListener("paste",e=>{e.preventDefault();note("本測驗不可貼上，請自行輸入。")});
 f.addEventListener("drop",e=>e.preventDefault());
+let ex=null;
+async function exportCsv(){const m=document.getElementById("exm");let dl=null;try{dl=window.claude&&await claude.use("downloads")}catch(e){}
+const c=v=>{let s=String(v);if(/^[=+\-@]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'};
+const L=[["姓名",ex.nm],["日期",ex.dt],["總分",ex.tot+" / 100"],["全對題數",ex.full+" / 20"],["離開頁面次數",ex.sw],[],["題號","縮寫／項目","英文／數值作答","得分","中文／單位作答","得分","小計"],...ex.rows].map(r=>r.map(c).join(","));
+const bad=/[\\\/:*?"<>|]/g;
+const fn="縮寫測驗_"+(ex.nm||"未填姓名").replace(bad,"")+"_"+ex.dt.replace(bad,"-")+".csv",data="\ufeff"+L.join("\r\n");
+try{if(dl){await dl.save({filename:fn,data})}else{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"text/csv;charset=utf-8"}));a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}m.textContent=" 已匯出"}catch(e){m.textContent=e&&e.code=="declined"?" 已取消":" 匯出失敗（"+((e&&e.code)||"未知")+"）"}}
 function lock(v){f.querySelectorAll("input").forEach(i=>i.disabled=v);document.getElementById("go").disabled=v}
 document.getElementById("go").onclick=()=>{
 const emp=[...f.querySelectorAll("input")].filter(i=>!i.value.trim()).length;
 const gb=document.getElementById("go");if(emp&&!gb.dataset.w){gb.dataset.w=1;gb.textContent="仍要送出";tipEl.textContent="還有 "+emp+" 個欄位未填寫，再按一次即送出。";return}delete gb.dataset.w;gb.textContent="送出評分";
-let tot=0,full=0;
-Q.forEach((q,i)=>{const e=grade(document.getElementById("e"+i).value,q[1],nE),z=grade(document.getElementById("z"+i).value,q[2],nZ),s=e.p+z.p;tot+=s;if(s==5)full++;
+let tot=0,full=0;const rows=[];
+Q.forEach((q,i)=>{const e=grade(document.getElementById("e"+i).value,q[1],nE),z=grade(document.getElementById("z"+i).value,q[2],nZ),s=e.p+z.p;tot+=s;if(s==5)full++;rows.push([i+1,q[0],document.getElementById("e"+i).value.trim(),fmt(e.p),document.getElementById("z"+i).value.trim(),fmt(z.p),fmt(s)]);
 const cls=(r)=>r.t=="正確"?"":` <span class="pen">${r.t}</span>`;
 show(document.getElementById("q"+i),s,[`<div>英文 ${fmt(e.p)}/2.5${cls(e)}</div><div>中文 ${fmt(z.p)}/2.5${cls(z)}</div>`,`<div class="ans">參考答案：${q[1][0]}／${q[2][0]}${q[2].length>1?"（亦可：":""}${q[2].slice(1,3).join("、")}${q[2].length>1?"）":""}</div>`])});
 NV.forEach((q,i)=>{const v=document.getElementById("nv"+i).value.trim().replace(/[~～–—－到至]/g,"-").replace(/\s/g,"").replace(/[^0-9.\-]/g,""),u=document.getElementById("nu"+i).value.trim().replace(/\s/g,"").replace(/[^a-zA-Z]/g,"").toLowerCase();
-const vp=q[1].includes(v)?2.5:0,up=q[4].includes(u)?2.5:0,s=vp+up;tot+=s;if(s==5)full++;
-show(document.getElementById("n"+i),s,[`<div>數值 ${fmt(vp)}/2.5${vp?"":' <span class="pen">錯誤或未作答</span>'}</div><div>單位 ${fmt(up)}/2.5${up?"":' <span class="pen">錯誤或未作答</span>'}</div>`,`<div class="ans">參考答案：${q[2]} ${q[3]}</div>`])});
+const UP=[[["g","dl"],["gm","dl"]],[["mm","hg"]]];let vp=0;if(q[1].includes(v))vp=2.5;else{const n=v.split("-");q[1].forEach(a=>{const m=a.split("-");const c=(n[0]&&n[0]==m[0]?1:0)+(n[1]&&n[1]==m[1]?1:0);if(c>=1&&vp<1)vp=1})}let up=0;if(q[4].includes(u))up=2.5;else if(u){UP[i].forEach(p=>{if(u.startsWith(p[0])||u.endsWith(p[1]))up=1})}const s=vp+up;tot+=s;if(s==5)full++;rows.push([19+i,q[0].replace(/^\d+\.\s*/,""),document.getElementById("nv"+i).value.trim(),fmt(vp),document.getElementById("nu"+i).value.trim(),fmt(up),fmt(s)]);
+show(document.getElementById("n"+i),s,[`<div>數值 ${fmt(vp)}/2.5${vp==2.5?"":vp?' <span class="pen">只對一半，得 1 分</span>':' <span class="pen">錯誤或未作答</span>'}</div><div>單位 ${fmt(up)}/2.5${up==2.5?"":up?' <span class="pen">只對一半，得 1 分</span>':' <span class="pen">錯誤或未作答</span>'}</div>`,`<div class="ans">參考答案：${q[2]} ${q[3]}</div>`])});
 const r=document.getElementById("result"),nm=document.getElementById("name").value.trim();
-r.style.display="block";r.innerHTML=`<div class="big">${fmt(tot)}<small> / 100</small></div><p>${nm?nm+"，":""}20 題中 ${full} 題全對。往下查看每題批改與參考答案。</p><p class="lv${sw?" w":""}">${sw?`作答期間離開頁面或切換視窗 ${sw} 次`:"作答期間未偵測到離開頁面"}</p>`;
+r.style.display="block";r.innerHTML=`<div class="big">${fmt(tot)}<small> / 100</small></div><p>${nm?nm+"，":""}20 題中 ${full} 題全對。往下查看每題批改與參考答案。</p><p class="lv${sw?" w":""}">${sw?`作答期間離開頁面或切換視窗 ${sw} 次`:"作答期間未偵測到離開頁面"}</p><p><button type="button" class="g" id="ex">匯出結果（CSV）</button><span id="exm"></span></p>`;ex={nm,dt:document.getElementById("date").value.trim()||new Date().toISOString().slice(0,10),tot:fmt(tot),full,sw,rows};document.getElementById("ex").onclick=exportCsv;
 active=false;lock(true);document.getElementById("tip").textContent="已評分";r.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})};
 document.getElementById("reset").onclick=()=>{const gb=document.getElementById("go");delete gb.dataset.w;gb.textContent="送出評分";f.querySelectorAll("input").forEach(i=>i.value="");f.querySelectorAll(".q").forEach(q=>{q.classList.remove("ok","part","bad");q.querySelector(".s").textContent="";const b=q.querySelector(".fb");b.hidden=true;b.innerHTML=""});document.getElementById("result").style.display="none";sw=0;active=true;lock(false);document.getElementById("tip").textContent="答案不分大小寫，標點可省略。";scrollTo(0,0)};
 </script>
