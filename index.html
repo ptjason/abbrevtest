@@ -51,7 +51,7 @@ button:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
 <body>
 <main>
 <header><h1>台大醫院復健部物理治療技術科</h1><p>學前測驗：請寫出中文和英文</p></header>
-<div class="rules"><b>評分方式：</b>共 20 題，每題 5 分，滿分 100 分。英文全文 2.5 分、中文 2.5 分；每處小錯（錯字、少字）扣 1 分，單項最多扣到 0 分。英文以單字計分時，每答對一個單字得 1 分，最高 2.5 分（與小錯扣分取較高者）。第 19、20 題為正常值，數值 2.5 分、單位 2.5 分；數值範圍只對一半得 1 分，單位只對一半也得 1 分。</div><div class="rules warn"><b>注意：</b>作答期間離開本頁面或切換視窗，系統會記錄次數，並顯示在評分結果中。</div>
+<div class="rules"><b>評分方式：</b>共 20 題，每題 5 分，滿分 100 分。英文全文 2.5 分、中文 2.5 分；每處小錯（錯字、少字）扣 1 分，單項最多扣到 0 分。中英文皆可以單字（詞）計分：每答對一個單字或詞得 1 分，最高 2.5 分（與小錯扣分取較高者）。第 19、20 題為正常值，數值 2.5 分、單位 2.5 分；數值範圍只對一半得 1 分，單位只對一半也得 1 分。</div><div class="rules warn"><b>注意：</b>作答期間離開本頁面或切換視窗，系統會記錄次數，並顯示在評分結果中。</div>
 <div class="meta"><label class="f">姓名<input type="text" id="name" autocomplete="off" placeholder="請輸入姓名"></label><label class="f">日期<input type="text" id="date" autocomplete="off" placeholder="例如 2026/11/27"></label></div>
 <div id="result" aria-live="polite"></div>
 <form id="qs" onsubmit="return false"></form>
@@ -86,10 +86,11 @@ f.innerHTML=h;
 const nE=s=>s.toLowerCase().replace(/[₁]/g,"1").replace(/[-_\/]/g," ").replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
 const nZ=s=>s.replace(/臺/g,"台").replace(/[\s、，,。.；;:：（）()「」\-]/g,"");
 function lev(a,b){const m=a.length,n=b.length,d=[];for(let i=0;i<=m;i++){d[i]=[i];}for(let j=1;j<=n;j++)d[0][j]=j;for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]==b[j-1]?0:1));return d[m][n]}
-function grade(inp,ans,norm){const x=norm(inp);if(!x)return{p:0,t:"未作答",e:0};let best=null;ans.forEach(a=>{const y=norm(a),d=lev(x,y);if(!best||d<best.d)best={d,len:y.length}});
-if(best.d==0)return{p:2.5,t:"正確",e:0};let wp=0,wc=0;if(norm===nE){ans.forEach(a=>{const aw=norm(a).split(" "),iw=x.split(" ");let c=0;aw.forEach(w=>{const k=iw.indexOf(w);if(k>=0){iw.splice(k,1);c++}});if(c>wc)wc=c});wp=Math.min(2.5,wc)}
+const ZT=[["心內膜|心肌內膜","心肌","切片"],["中央","靜脈","壓"],["用力","肺活量|活量"],["心房","中膊|中隔","缺損"],["體溫","脈搏","呼吸"],["一天|每天|每日","兩次|二次"],["心肌","病變|病"],["大隱","靜脈","移植|繞道"],["急性","心肌","梗塞|梗死"],["全抗藥|泛抗藥|抗所有藥物","鮑氏","不動桿菌"],["冠狀動脈","鈍緣","支"],["急性","呼吸","窘迫","症"],["吸氣|吸","吐氣|吐|呼氣|呼","比"],["正常","竦性","節律|心律|節奏"],["第一秒|一秒","用力","呼氣","容積|容量|量"],["控制|連續|持續","模式|強制","通氣"],["心房","顫動|震顫"],["二尖瓣|僧帽瓣","逆流|閉鎖不全"]];
+function grade(inp,ans,norm,terms){const x=norm(inp);if(!x)return{p:0,t:"未作答",e:0};let best=null;ans.forEach(a=>{const y=norm(a),d=lev(x,y);if(!best||d<best.d)best={d,len:y.length}});
+if(best.d==0)return{p:2.5,t:"正確",e:0};let wp=0,wc=0;if(norm===nE){ans.forEach(a=>{const aw=norm(a).split(" "),iw=x.split(" ");let c=0;aw.forEach(w=>{const k=iw.indexOf(w);if(k>=0){iw.splice(k,1);c++}});if(c>wc)wc=c});wp=Math.min(2.5,wc)}else if(terms){terms.forEach(t=>{if(t.split("|").some(a=>x.includes(nZ(a))))wc++});wp=Math.min(2.5,wc)}
 const lim=Math.min(2,Math.floor(best.len*0.34));const tp=best.d<=lim?Math.max(0,2.5-best.d):0;
-if(wp>tp)return{p:wp,t:`答對 ${wc} 個單字，得 ${fmt(wp)} 分`,e:0};if(tp>0)return{p:tp,t:`小錯 ${best.d} 處，扣 ${best.d} 分`,e:best.d};return{p:0,t:"錯誤",e:0}}
+if(wp>tp)return{p:wp,t:`答對 ${wc} 個${norm===nE?"單字":"詞"}，得 ${fmt(wp)} 分`,e:0};if(tp>0)return{p:tp,t:`小錯 ${best.d} 處，扣 ${best.d} 分`,e:best.d};return{p:0,t:"錯誤",e:0}}
 const fmt=n=>Number.isInteger(n)?n:n.toFixed(1);
 function show(el,sc,lines){el.classList.remove("ok","part","bad");el.classList.add(sc==5?"ok":sc>0?"part":"bad");el.querySelector(".s").textContent=fmt(sc)+" / 5";const fb=el.querySelector(".fb");fb.hidden=false;fb.innerHTML=lines.join("")}
 let sw=0,active=true,busy=false,lastLeave=0;
@@ -113,7 +114,7 @@ document.getElementById("go").onclick=()=>{
 const emp=[...f.querySelectorAll("input")].filter(i=>!i.value.trim()).length;
 const gb=document.getElementById("go");if(emp&&!gb.dataset.w){gb.dataset.w=1;gb.textContent="仍要送出";tipEl.textContent="還有 "+emp+" 個欄位未填寫，再按一次即送出。";return}delete gb.dataset.w;gb.textContent="送出評分";
 let tot=0,full=0;const rows=[];
-Q.forEach((q,i)=>{const e=grade(document.getElementById("e"+i).value,q[1],nE),z=grade(document.getElementById("z"+i).value,q[2],nZ),s=e.p+z.p;tot+=s;if(s==5)full++;rows.push([i+1,q[0],document.getElementById("e"+i).value.trim(),fmt(e.p),document.getElementById("z"+i).value.trim(),fmt(z.p),fmt(s)]);
+Q.forEach((q,i)=>{const e=grade(document.getElementById("e"+i).value,q[1],nE),z=grade(document.getElementById("z"+i).value,q[2],nZ,ZT[i]),s=e.p+z.p;tot+=s;if(s==5)full++;rows.push([i+1,q[0],document.getElementById("e"+i).value.trim(),fmt(e.p),document.getElementById("z"+i).value.trim(),fmt(z.p),fmt(s)]);
 const cls=(r)=>r.t=="正確"?"":` <span class="pen">${r.t}</span>`;
 show(document.getElementById("q"+i),s,[`<div>英文 ${fmt(e.p)}/2.5${cls(e)}</div><div>中文 ${fmt(z.p)}/2.5${cls(z)}</div>`,`<div class="ans">參考答案：${q[1][0]}／${q[2][0]}${q[2].length>1?"（亦可：":""}${q[2].slice(1,3).join("、")}${q[2].length>1?"）":""}</div>`])});
 NV.forEach((q,i)=>{const v=document.getElementById("nv"+i).value.trim().replace(/[~～–—－到至]/g,"-").replace(/\s/g,"").replace(/[^0-9.\-]/g,""),u=document.getElementById("nu"+i).value.trim().replace(/\s/g,"").replace(/[^a-zA-Z]/g,"").toLowerCase();
